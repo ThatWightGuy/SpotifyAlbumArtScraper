@@ -1,6 +1,6 @@
-from config import SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from config import SPOTIPY_CLIENT_ID, SPOTIPY_CLIENT_SECRET
 
 
 def login():
@@ -16,9 +16,22 @@ def login():
 
     return sp
 
-results = login().search(q="artist: Radiohead", type="artist")
-items = results['artists']['items']
 
-if len(items) > 0:
-    artist = items[0]
-    print(artist)
+def searchSongs(login, track="", artist="", album=""):
+    results = []
+
+    query = ("", "track: " + track + " ")[track != ""] + \
+            ("", "artist: " + artist + " ")[artist != ""] + \
+            ("", "album: " + album + " ")[album != ""]
+
+    search = login.search(q=query, type="track")
+
+    for track in search["tracks"]["items"]:
+        results.append({
+            "track": track['name'],
+            "album": track["album"]["name"],
+            "artists": [name["name"] for name in track["artists"]],
+            "cover": track['album']['images'][0]['url']
+        })
+
+    return results
